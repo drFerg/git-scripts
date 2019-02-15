@@ -1,0 +1,47 @@
+[alias]
+	br = branch
+	dt = difftool
+	mt = mergetool
+	co = checkout
+	cob = checkout -b
+	ci = commit
+	st = status
+	hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --decorate --date=short
+	lg = log --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+
+	# Show files changed in each commit
+	ll = log --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --numstat
+
+	# Grep the log
+	glag = log -E -i --grep
+
+	# The extra '&& :' is needed: https://stackoverflow.com/a/25915221
+	sync = !git fetch --all --prune && git rebase -p --autostash $1 && :
+
+	# Commits everything in my working directory and then does a hard reset to remove that commit.
+	# You can reach that commit later in 'git reflog'
+	wipe = !git add -A && git commit -qm 'WIPE SAVEPOINT' && git reset HEAD~1 --hard
+
+	# Get the current branch name (not so useful in itself, but used in other aliases)
+	branch-name = !git symbolic-ref --short HEAD
+
+	# Push the current branch to the remote "origin", and set it to track
+	# the upstream branch
+	publish = !git push -u origin $(git branch-name)
+
+	# Delete the remote version of the current branch
+	unpublish = !git push origin :$(git branch-name)
+
+	uncommit = !git reset --soft HEAD^
+	unstage = !git reset
+	upstream = rev-parse --abbrev-ref --symbolic-full-name @{upstream}
+
+	# Rename [branch] to done-[branch]
+	done = "!f() { git branch | grep "$1" | cut -c 3- | grep -v done | xargs -I{} git branch -m {} done-{}; }; f"
+
+	# Generate a branch from type + trello card url and checkout the new branch
+	new = !tabgit branch $1 $2 | xargs git checkout -b &&:
+	n = !git new
+	# Fork current branch, incrementing version number
+	fork = !tabgit fork $(git branch-name) | xargs git checkout -b 
+	fk = !git fork
